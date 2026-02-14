@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Claude Color Palette */
+  --claude-bg: #F9F5EF;
+  --claude-surface: #FFFFFF;
+  --claude-surface-alt: #F0EBE3;
+  --claude-border: #E5DFD5;
+  --claude-text: #1A1714;
+  --claude-text-secondary: #6B6560;
+  --claude-accent: #D97706;
+  --claude-accent-hover: #B45309;
+  --claude-accent-light: #FEF3C7;
+  --claude-accent-bg: #FFFBEB;
+  --claude-terracotta: #C2410C;
+  --claude-terracotta-light: #FFF7ED;
+  --claude-sage: #3D7A5F;
+  --claude-sage-light: #ECFDF5;
+  --claude-sage-dark: #2D5A45;
+  --claude-warm-gray: #A39E96;
+  --claude-error: #DC2626;
+  --claude-error-light: #FEF2F2;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--claude-bg);
+  --color-foreground: var(--claude-text);
+  --color-surface: var(--claude-surface);
+  --color-surface-alt: var(--claude-surface-alt);
+  --color-border-custom: var(--claude-border);
+  --color-text-secondary: var(--claude-text-secondary);
+  --color-accent: var(--claude-accent);
+  --color-accent-hover: var(--claude-accent-hover);
+  --color-accent-light: var(--claude-accent-light);
+  --color-accent-bg: var(--claude-accent-bg);
+  --color-terracotta: var(--claude-terracotta);
+  --color-terracotta-light: var(--claude-terracotta-light);
+  --color-sage: var(--claude-sage);
+  --color-sage-light: var(--claude-sage-light);
+  --color-sage-dark: var(--claude-sage-dark);
+  --color-warm-gray: var(--claude-warm-gray);
+  --color-error: var(--claude-error);
+  --color-error-light: var(--claude-error-light);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--claude-bg);
+  color: var(--claude-text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Date picker styles */
+.rdp {
+  --rdp-accent-color: var(--claude-accent);
+  --rdp-background-color: var(--claude-accent-light);
+}
+
+.rdp-day_selected:not(.rdp-day_disabled) {
+  background-color: var(--claude-accent) !important;
+  color: white !important;
+}
+
+.rdp-day_range_middle {
+  background-color: var(--claude-accent-light) !important;
+  color: var(--claude-text) !important;
+}
+
+/* Stripe / Payment button styling */
+.lp-submit-button {
+  background-color: var(--claude-accent) !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  padding: 0.875rem 1.5rem !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s !important;
+}
+
+.lp-submit-button:hover {
+  background-color: var(--claude-accent-hover) !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--claude-surface-alt);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--claude-warm-gray);
+  border-radius: 3px;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--claude-surface-alt) 25%, var(--claude-border) 50%, var(--claude-surface-alt) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
 }
