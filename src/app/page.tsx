@@ -79,7 +79,7 @@ export default function Home() {
           style={{ backgroundImage: "url('/media/hero.png')" }}
         />
         {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70" />
+        <div className="absolute inset-0 bg-black/20" />
 
         {/* Hero Content — centered vertically in the available space above search bar */}
         <div className="relative flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">

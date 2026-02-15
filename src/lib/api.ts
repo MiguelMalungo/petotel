@@ -93,22 +93,22 @@ export async function getHotelDetails(hotelId: string): Promise<HotelDetailsResp
 }
 
 export async function prebook(offerId: string): Promise<any> {
-    try {
-        const res = await fetch(`${BOOK_BASE}/rates/prebook`, {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ usePaymentSdk: true, offerId }),
-        });
-        if (!res.ok) {
-             const errorText = await res.text();
-             console.error("Prebook failed:", errorText);
-             throw new Error(`Prebook API error: ${res.statusText}`);
-        }
-        return res.json();
-    } catch (error) {
-        console.error("prebook failed:", error);
-        throw error;
+  try {
+    const res = await fetch(`${BOOK_BASE}/rates/prebook`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ usePaymentSdk: true, offerId }),
+    });
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Prebook failed:", errorText);
+      throw new Error(`Prebook API error: ${res.statusText}`);
     }
+    return res.json();
+  } catch (error) {
+    console.error("prebook failed:", error);
+    throw error;
+  }
 
 }
 
@@ -119,7 +119,7 @@ export async function book(body: Record<string, unknown>): Promise<BookingRespon
       headers,
       body: JSON.stringify(body),
     });
-    
+
     // Attempt to parse JSON regardless of status to get error details
     const data = await res.json();
 
@@ -127,7 +127,7 @@ export async function book(body: Record<string, unknown>): Promise<BookingRespon
       console.error("Book API error:", data);
       throw new Error(data?.error?.message || `Booking failed: ${res.statusText}`);
     }
-    
+
     return data;
   } catch (error) {
     console.error("book failed:", error);
