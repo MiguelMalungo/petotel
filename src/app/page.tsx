@@ -82,17 +82,17 @@ export default function Home() {
 
         {/* Hero Content */}
         <div className="relative flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16 pb-8 lg:pt-24 lg:pb-12 min-h-[320px] lg:min-h-[500px]">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90 mb-6">
+          <div className="flex flex-col items-center text-center -translate-y-[10px] lg:-translate-y-[50px]">
+            <div className="order-3 lg:order-1 inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90 mt-6 lg:mt-0 lg:mb-6">
               <PawPrint className="w-4 h-4" />
               <span>Pet-Friendly Hotels Only</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-4 drop-shadow-lg">
+            <h1 className="order-1 lg:order-2 text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-4 drop-shadow-lg">
               Travel with your
               <br />
               <span className="text-accent-light">best friend</span>
             </h1>
-            <p className="text-base lg:text-lg text-white/85 max-w-xl mx-auto drop-shadow">
+            <p className="order-2 lg:order-3 text-base lg:text-lg text-white/85 max-w-xl mx-auto drop-shadow">
               Find hotels that welcome your furry companions. Every listing is
               verified pet-friendly with clear pet policies.
             </p>
@@ -232,7 +232,7 @@ export default function Home() {
                 <button
                   onClick={handleSearch}
                   disabled={!canSearch}
-                  className="h-full px-8 py-3.5 bg-accent text-white font-semibold rounded-xl hover:bg-accent-hover transition-colors disabled:cursor-not-allowed disabled:opacity-100 text-lg inline-flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="h-full px-8 py-3.5 bg-[#E98C20] text-white font-semibold rounded-xl hover:bg-[#C67216] transition-colors disabled:cursor-not-allowed disabled:opacity-100 text-lg inline-flex items-center justify-center gap-2 whitespace-nowrap"
                 >
                   <Search className="w-5 h-5" />
                   Search Hotels
@@ -373,7 +373,7 @@ export default function Home() {
             <button
               onClick={handleSearch}
               disabled={!canSearch}
-              className="w-full py-3.5 bg-accent text-white font-bold rounded-xl hover:bg-accent-hover transition-all disabled:opacity-60 disabled:cursor-not-allowed text-base flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-[#E98C20] text-white font-bold rounded-xl hover:bg-[#C67216] transition-all disabled:opacity-60 disabled:cursor-not-allowed text-base flex items-center justify-center gap-2"
             >
               <Search className="w-5 h-5" />
               Search Hotels
@@ -393,25 +393,47 @@ export default function Home() {
               icon: <ShieldCheck className="w-10 h-10 text-accent" />,
               title: "Verified Pet-Friendly",
               desc: "Every hotel is checked for pet policies. No surprises at check-in.",
+              bg: "/media/feature_verified.png",
             },
             {
               icon: <ClipboardList className="w-10 h-10 text-accent" />,
               title: "Clear Pet Policies",
               desc: "See pet fees, size limits, and rules before you book.",
+              bg: "/media/feature_policies.png",
             },
             {
               icon: <Sparkles className="w-10 h-10 text-accent" />,
               title: "AI-Powered Search",
               desc: 'Search by vibe \u2014 try "cozy cabin that welcomes big dogs" and find the perfect match.',
+              bg: "/media/feature_ai.png",
             },
           ].map((f) => (
             <div
               key={f.title}
-              className="bg-surface rounded-2xl border border-border-custom p-6 text-center"
+              className="group relative overflow-hidden rounded-2xl border border-border-custom h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 hover:shadow-xl transition-all duration-300"
             >
-              <div className="flex justify-center mb-4">{f.icon}</div>
-              <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
-              <p className="text-sm text-text-secondary">{f.desc}</p>
+              {/* Background Image */}
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                style={{ backgroundImage: `url('${f.bg}')` }}
+              />
+              {/* Dark Overlay (40%) */}
+              <div className="absolute inset-0 bg-black/40 transition-opacity duration-300 group-hover:bg-black/50" />
+
+              {/* Icon - Absolute Top */}
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex justify-center p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+                {f.icon}
+              </div>
+
+              {/* Content */}
+              <div className="relative z-10 flex flex-col items-center mt-32">
+                <h3 className="font-semibold text-xl text-white mb-2 drop-shadow-md">
+                  {f.title}
+                </h3>
+                <p className="text-sm text-white/90 drop-shadow">
+                  {f.desc}
+                </p>
+              </div>
             </div>
           ))}
         </div>

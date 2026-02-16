@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { PawPrint, FlaskConical } from "lucide-react";
+import { FlaskConical } from "lucide-react";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -26,8 +27,14 @@ export default function Header() {
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <PawPrint className="w-12 h-12 text-accent" />
+        <Link href="/" className="flex items-center gap-0 group">
+          <Image
+            src="/media/petotel_logo.png"
+            alt="PetOtel Logo"
+            width={55}
+            height={55}
+            className="w-[55px] h-[55px] object-contain"
+          />
           <span className={`text-4xl font-bold tracking-tight ${isHome ? "text-white" : "text-foreground"}`}>
             Pet<span className="text-accent">Otel</span>
           </span>

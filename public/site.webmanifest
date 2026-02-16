@@ -5,7 +5,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F9F5EF",
-  "theme_color": "#D97706",
+  "theme_color": "#E98C20",
   "icons": [
     {
       "src": "/favicon.ico",
@@ -13,5 +13,8 @@
       "type": "image/x-icon"
     }
   ],
-  "categories": ["travel", "lifestyle"]
+  "categories": [
+    "travel",
+    "lifestyle"
+  ]
 }

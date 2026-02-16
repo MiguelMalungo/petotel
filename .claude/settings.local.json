@@ -7,7 +7,13 @@
       "Bash(npm run dev:*)",
       "Bash(lsof:*)",
       "Bash(curl:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nRedesign mobile search section and improve hero overlay\n\n- Separate mobile and desktop search layouts to fix overlapping elements\n- Mobile: clean card-based search with stacked fields below the hero\n- Desktop: keep horizontal search bar anchored to hero bottom\n- Add mobile hero image with responsive bg-image switching\n- Update DateRangePicker with bottom-sheet modal on mobile\n- Set hero overlay to 33% opacity for better readability\n- Remove unused hero copy image\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

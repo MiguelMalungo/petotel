@@ -102,8 +102,8 @@ export const metadata: Metadata = {
   },
   category: "Travel",
   other: {
-    "theme-color": "#D97706",
-    "msapplication-TileColor": "#D97706",
+    "theme-color": "#E98C20",
+    "msapplication-TileColor": "#E98C20",
   },
 };
 
@@ -119,7 +119,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#D97706" />
+        <meta name="theme-color" content="#E98C20" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
