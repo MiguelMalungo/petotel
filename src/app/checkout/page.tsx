@@ -11,6 +11,9 @@ import {
   FlaskConical,
 } from "lucide-react";
 
+// Note: This page should not be indexed by search engines.
+// The noindex meta tag is added via the metadata export below.
+
 type Step = "prebook" | "details" | "payment";
 
 function CheckoutFlow() {

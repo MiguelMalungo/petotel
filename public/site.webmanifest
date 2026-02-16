@@ -1,0 +1,17 @@
+{
+  "name": "PetOtel — Pet-Friendly Hotel Booking",
+  "short_name": "PetOtel",
+  "description": "Find and book verified pet-friendly hotels worldwide. Travel with your best friend.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F9F5EF",
+  "theme_color": "#D97706",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["travel", "lifestyle"]
+}

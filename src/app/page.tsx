@@ -244,8 +244,9 @@ export default function Home() {
       </section>
 
       {/* Mobile Search Section — below the hero, clean card layout */}
-      <div className="lg:hidden relative z-10 -mt-6">
+      <div className="lg:hidden relative z-10 -mt-6" role="search" aria-label="Search pet-friendly hotels">
         <div className="mx-4 bg-surface rounded-2xl shadow-lg border border-border-custom p-4">
+          <h2 className="sr-only">Find Pet-Friendly Hotels</h2>
           {/* Mode Toggle */}
           <div className="flex gap-1 bg-surface-alt rounded-xl p-1 mb-4">
             <button

@@ -138,6 +138,13 @@ function HotelDetailPage() {
     fetchHotelData();
   }, [fetchHotelData]);
 
+  // Dynamic SEO title for browser tab
+  useEffect(() => {
+    if (hotel) {
+      document.title = `${hotel.name} — Pet-Friendly Hotel in ${hotel.city} | PetOtel`;
+    }
+  }, [hotel]);
+
   function handleSelectOffer(offerId: string, price: number, currency: string, roomName: string) {
     const params = new URLSearchParams({
       offerId,

@@ -12,6 +12,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+// SEO: Dynamic page title is handled via useEffect in the client component
+
 interface HotelCard {
   hotelId: string;
   name: string;
@@ -207,6 +209,12 @@ function SearchResults() {
   const searchLabel = vibeQuery
     ? `"${vibeQuery}"`
     : placeName || "your destination";
+
+  // Dynamic SEO title for browser tab
+  useEffect(() => {
+    const destination = placeName || vibeQuery || "Your Destination";
+    document.title = `Pet-Friendly Hotels in ${destination} | PetOtel`;
+  }, [placeName, vibeQuery]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-14">
