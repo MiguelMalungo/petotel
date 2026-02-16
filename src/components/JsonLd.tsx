@@ -3,8 +3,8 @@ export default function JsonLd() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "PetOtel",
-    url: "https://petotel.com",
-    logo: "https://petotel.com/media/og-image.png",
+    url: "https://petotel.one",
+    logo: "https://petotel.one/media/og-image.png",
     description:
       "Find and book verified pet-friendly hotels worldwide. Travel with your furry companions without worry.",
     sameAs: [],
@@ -19,7 +19,7 @@ export default function JsonLd() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "PetOtel",
-    url: "https://petotel.com",
+    url: "https://petotel.one",
     description:
       "Book pet-friendly hotels worldwide. Every listing is verified to welcome dogs, cats, and other pets.",
     potentialAction: {
@@ -27,7 +27,7 @@ export default function JsonLd() {
       target: {
         "@type": "EntryPoint",
         urlTemplate:
-          "https://petotel.com/search?vibeQuery={search_term_string}",
+          "https://petotel.one/search?vibeQuery={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
@@ -37,7 +37,7 @@ export default function JsonLd() {
     "@context": "https://schema.org",
     "@type": "TravelAgency",
     name: "PetOtel",
-    url: "https://petotel.com",
+    url: "https://petotel.one",
     description:
       "Pet-friendly hotel booking platform. Find verified accommodations that welcome dogs, cats, and other pets worldwide.",
     priceRange: "$$",

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = "https://petotel.com";
+const SITE_URL = "https://petotel.one";
 const SITE_NAME = "PetOtel";
 const SITE_DESCRIPTION =
   "Find and book verified pet-friendly hotels worldwide. Search by destination or vibe — every listing welcomes dogs, cats, and other pets with clear pet policies and fees.";

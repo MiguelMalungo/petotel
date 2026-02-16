@@ -8,7 +8,6 @@ import { PrebookData } from "@/lib/types";
 import {
   PawPrint,
   ArrowLeft,
-  FlaskConical,
 } from "lucide-react";
 
 // Note: This page should not be indexed by search engines.
@@ -89,7 +88,26 @@ function CheckoutFlow() {
 
     paymentInitialized.current = true;
 
-    const returnUrl = `${window.location.origin}/confirmation?prebookId=${prebookData.prebookId}&transactionId=${prebookData.transactionId}&hotelId=${hotelId}&checkin=${checkin}&checkout=${checkout}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&email=${encodeURIComponent(email)}&hotelName=${encodeURIComponent(hotelName)}&petType=${petType}&petCount=${petCount}`;
+    // Store sensitive data in sessionStorage before redirecting
+    // This prevents exposing transactionId and prebookId in URLs
+    sessionStorage.setItem(
+      "checkout_data",
+      JSON.stringify({
+        prebookId: prebookData.prebookId,
+        transactionId: prebookData.transactionId,
+        hotelId,
+        checkin,
+        checkout,
+        firstName,
+        lastName,
+        email,
+        hotelName,
+        petType,
+        petCount,
+      })
+    );
+
+    const returnUrl = `${window.location.origin}/confirmation`;
 
     try {
       const config = {
@@ -343,21 +361,6 @@ function CheckoutFlow() {
             <p className="text-sm text-text-secondary mb-4">
               Complete your payment to confirm the booking.
             </p>
-
-            {/* Sandbox notice */}
-            <div className="bg-accent-bg border border-accent-light rounded-xl p-4 mb-6">
-              <p className="text-sm text-accent font-medium mb-1 flex items-center gap-1.5">
-                <FlaskConical className="w-4 h-4" />
-                Sandbox Mode — Test Card
-              </p>
-              <p className="text-xs text-text-secondary">
-                Use card number{" "}
-                <span className="font-mono font-medium text-foreground">
-                  4242 4242 4242 4242
-                </span>
-                , any 3-digit CVV, and any future expiration date.
-              </p>
-            </div>
 
             {/* Payment Element */}
             <div id="payment-element" className="min-h-[200px]">

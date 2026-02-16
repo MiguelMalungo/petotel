@@ -1,9 +1,9 @@
-const LITEAPI_KEY = process.env.NEXT_PUBLIC_LITEAPI_KEY || "";
+const LITEAPI_KEY = process.env.LITEAPI_KEY || "";
 const BASE = "https://api.liteapi.travel/v3.0";
 const BOOK_BASE = "https://book.liteapi.travel/v3.0";
 
 if (!LITEAPI_KEY) {
-  console.warn("NEXT_PUBLIC_LITEAPI_KEY is not set");
+  console.warn("LITEAPI_KEY is not set");
 }
 
 const headers = {

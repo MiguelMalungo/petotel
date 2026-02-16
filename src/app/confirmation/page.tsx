@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { BookingData } from "@/lib/types";
 import {
@@ -12,25 +12,56 @@ import {
 } from "lucide-react";
 
 function ConfirmationContent() {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const bookingAttempted = useRef(false);
 
-  const prebookId = searchParams.get("prebookId") || "";
-  const transactionId = searchParams.get("transactionId") || "";
-  const hotelId = searchParams.get("hotelId") || "";
-  const checkin = searchParams.get("checkin") || "";
-  const checkout = searchParams.get("checkout") || "";
-  const firstName = searchParams.get("firstName") || "";
-  const lastName = searchParams.get("lastName") || "";
-  const email = searchParams.get("email") || "";
-  const hotelName = searchParams.get("hotelName") || "";
-  const petType = searchParams.get("petType") || "dog";
-  const petCount = searchParams.get("petCount") || "1";
+  // Retrieve sensitive data from sessionStorage instead of URL params
+  const [sessionData, setSessionData] = useState<{
+    prebookId: string;
+    transactionId: string;
+    hotelId: string;
+    checkin: string;
+    checkout: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    hotelName: string;
+    petType: string;
+    petCount: string;
+  } | null>(null);
+
+  const prebookId = sessionData?.prebookId || "";
+  const transactionId = sessionData?.transactionId || "";
+  const hotelId = sessionData?.hotelId || "";
+  const checkin = sessionData?.checkin || "";
+  const checkout = sessionData?.checkout || "";
+  const firstName = sessionData?.firstName || "";
+  const lastName = sessionData?.lastName || "";
+  const email = sessionData?.email || "";
+  const hotelName = sessionData?.hotelName || "";
+  const petType = sessionData?.petType || "dog";
+  const petCount = sessionData?.petCount || "1";
 
   const [booking, setBooking] = useState<BookingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Load checkout data from sessionStorage on mount
+  useEffect(() => {
+    const data = sessionStorage.getItem("checkout_data");
+    if (data) {
+      try {
+        setSessionData(JSON.parse(data));
+      } catch (err) {
+        console.error("Failed to parse checkout_data from sessionStorage:", err);
+        setError("Invalid session data. Please try booking again.");
+        setLoading(false);
+      }
+    } else {
+      setError("Session expired. Please start a new booking.");
+      setLoading(false);
+    }
+  }, []);
 
   const completeBooking = useCallback(async () => {
     if (!prebookId || !transactionId || bookingAttempted.current) return;
@@ -65,6 +96,8 @@ function ConfirmationContent() {
         );
       } else if (data.data) {
         setBooking(data.data);
+        // Clear sensitive data from sessionStorage after successful booking
+        sessionStorage.removeItem("checkout_data");
       } else {
         setError("Unexpected response. Please contact support.");
       }

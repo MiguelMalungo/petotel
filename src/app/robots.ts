@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/checkout", "/confirmation"],
       },
     ],
-    sitemap: "https://petotel.com/sitemap.xml",
+    sitemap: "https://petotel.one/sitemap.xml",
   };
 }
