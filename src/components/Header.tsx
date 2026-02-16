@@ -29,7 +29,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-0 group">
           <Image
-            src="/media/petotel_logo.png"
+            src="/media/logovector.svg"
             alt="PetOtel Logo"
             width={55}
             height={55}
