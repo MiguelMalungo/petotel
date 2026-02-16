@@ -35,7 +35,7 @@ export default function Header() {
             height={55}
             className="w-[55px] h-[55px] object-contain"
           />
-          <span className={`text-4xl font-bold tracking-tight ${isHome ? "text-white" : "text-foreground"}`}>
+          <span className={`text-4xl font-bold tracking-tight ${(isHome && !isScrolled) ? "text-white" : "text-foreground"}`}>
             Pet<span className="text-accent">Otel</span>
           </span>
         </Link>
