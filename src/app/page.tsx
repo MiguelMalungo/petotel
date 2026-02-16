@@ -390,19 +390,19 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              icon: <ShieldCheck className="w-10 h-10 text-accent" />,
+              icon: <ShieldCheck className="w-10 h-10 text-[#E98C20]" />,
               title: "Verified Pet-Friendly",
               desc: "Every hotel is checked for pet policies. No surprises at check-in.",
               bg: "/media/feature_verified.png",
             },
             {
-              icon: <ClipboardList className="w-10 h-10 text-accent" />,
+              icon: <ClipboardList className="w-10 h-10 text-[#E98C20]" />,
               title: "Clear Pet Policies",
               desc: "See pet fees, size limits, and rules before you book.",
               bg: "/media/feature_policies.png",
             },
             {
-              icon: <Sparkles className="w-10 h-10 text-accent" />,
+              icon: <Sparkles className="w-10 h-10 text-[#E98C20]" />,
               title: "AI-Powered Search",
               desc: 'Search by vibe \u2014 try "cozy cabin that welcomes big dogs" and find the perfect match.',
               bg: "/media/feature_ai.png",
