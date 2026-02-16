@@ -7,12 +7,15 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Image
-              src="/media/petotel.png"
+              src="/media/petotel_logo.png"
               alt="PetOtel Logo"
-              width={120}
-              height={40}
-              className="h-8 w-auto object-contain"
+              width={24}
+              height={24}
+              className="w-6 h-6 object-contain"
             />
+            <span className="font-semibold text-foreground">
+              Pet<span className="text-accent">Otel</span>
+            </span>
           </div>
           <p className="text-sm text-text-secondary text-center">
             Pet-friendly hotel booking. Travel with your furry friends.

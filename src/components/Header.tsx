@@ -29,12 +29,15 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-0 group">
           <Image
-            src="/media/petotel.png"
+            src="/media/petotel_logo.png"
             alt="PetOtel Logo"
-            width={180}
-            height={60}
-            className="h-14 w-auto object-contain"
+            width={55}
+            height={55}
+            className="w-[55px] h-[55px] object-contain"
           />
+          <span className={`text-4xl font-bold tracking-tight ${isHome ? "text-white" : "text-foreground"}`}>
+            Pet<span className="text-accent">Otel</span>
+          </span>
         </Link>
         <nav className="flex items-center gap-6 text-sm text-text-secondary">
           <span className="text-xs bg-accent-light text-accent font-medium px-2 py-1 rounded-full inline-flex items-center gap-1">
