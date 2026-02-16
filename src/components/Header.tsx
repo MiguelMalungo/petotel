@@ -40,10 +40,7 @@ export default function Header() {
           </span>
         </Link>
         <nav className="flex items-center gap-6 text-sm text-text-secondary">
-          <span className="text-xs bg-accent-light text-accent font-medium px-2 py-1 rounded-full inline-flex items-center gap-1">
-            <FlaskConical className="w-3 h-3" />
-            Sandbox Mode
-          </span>
+
         </nav>
       </div>
     </header>
