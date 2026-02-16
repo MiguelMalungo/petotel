@@ -47,8 +47,12 @@ export interface HotelBrief {
 }
 
 export interface HotelPolicy {
+  policy_type?: string;
   name: string;
   description: string;
+  pets_allowed?: string;
+  child_allowed?: string;
+  parking?: string;
 }
 
 export interface HotelRoom {
@@ -73,6 +77,7 @@ export interface HotelDetail {
   location: { latitude: number; longitude: number };
   rooms: HotelRoom[];
   policies: HotelPolicy[];
+  petsAllowed?: boolean | null;
   sentiment_analysis?: { pros: string[]; cons: string[] };
 }
 

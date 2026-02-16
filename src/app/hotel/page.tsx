@@ -184,9 +184,49 @@ function HotelDetailPage() {
     );
   }
 
-  const petPolicy = hotel.policies?.find((p) =>
-    p.name.toLowerCase().includes("pet")
-  );
+  // Extract pet policy from multiple sources
+  let petPolicyText: string | undefined;
+  let petPolicySource: "policy" | "boolean" | "facility" | undefined;
+
+  if (hotel.policies) {
+    for (const pol of hotel.policies) {
+      // Check dedicated pets_allowed field first (richest info)
+      if (pol.pets_allowed && pol.pets_allowed.trim()) {
+        petPolicyText = pol.pets_allowed;
+        petPolicySource = "policy";
+        break;
+      }
+      // Fallback: check policy name for "pet"
+      if (pol.name.toLowerCase().includes("pet") && pol.description.trim()) {
+        petPolicyText = pol.description;
+        petPolicySource = "policy";
+      }
+    }
+  }
+
+  // Fallback to petsAllowed boolean
+  if (!petPolicyText && hotel.petsAllowed === true) {
+    petPolicyText = "Pets are welcome at this hotel. Contact the property for specific requirements and fees.";
+    petPolicySource = "boolean";
+  }
+
+  // Check facilities for pet-related entries
+  if (!petPolicyText && hotel.hotelFacilities) {
+    const petFacilities = hotel.hotelFacilities.filter((f) =>
+      f.toLowerCase().includes("pet")
+    );
+    if (petFacilities.length > 0) {
+      petPolicyText = `This hotel offers: ${petFacilities.join(", ")}. Contact the property for full pet policy details.`;
+      petPolicySource = "facility";
+    }
+  }
+
+  const isPetFriendly = hotel.petsAllowed !== false && (!!petPolicyText || hotel.petsAllowed === true);
+
+  // Legacy reference for the JSX below
+  const petPolicy = petPolicyText
+    ? { name: "Pet Policy", description: petPolicyText }
+    : undefined;
 
   const images = hotel.hotelImages?.length
     ? hotel.hotelImages
@@ -272,14 +312,26 @@ function HotelDetailPage() {
             </div>
 
             {/* Pet Policy */}
-            {petPolicy ? (
+            {isPetFriendly && petPolicy ? (
               <div className="bg-sage-light border border-sage/20 rounded-xl p-4 mb-4">
-                <h3 className="font-semibold text-sage-dark text-sm mb-1 flex items-center gap-2">
+                <h3 className="font-semibold text-sage-dark text-sm mb-2 flex items-center gap-2">
                   <PawPrint className="w-4 h-4" />
                   Pet Policy
                 </h3>
-                <p className="text-sm text-sage-dark/80">
+                <p className="text-sm text-sage-dark/80 leading-relaxed">
                   {petPolicy.description}
+                </p>
+                {petPolicySource === "boolean" || petPolicySource === "facility" ? (
+                  <p className="text-xs text-sage-dark/60 mt-2">
+                    We recommend confirming specific pet requirements directly with the hotel before check-in.
+                  </p>
+                ) : null}
+              </div>
+            ) : hotel.petsAllowed === false ? (
+              <div className="bg-error-light border border-error/20 rounded-xl p-4 mb-4">
+                <p className="text-sm text-error flex items-center gap-2">
+                  <PawPrint className="w-4 h-4" />
+                  This hotel does not allow pets.
                 </p>
               </div>
             ) : (

@@ -53,6 +53,7 @@ function SearchResults() {
 
     try {
       // Build the rates request body
+      // Use facility ID 4 ("Pets allowed") to pre-filter at the API level
       const body: Record<string, unknown> = {
         occupancies: [{ adults }],
         currency: "USD",
@@ -62,6 +63,8 @@ function SearchResults() {
         roomMapping: true,
         maxRatesPerHotel: 1,
         includeHotelData: true,
+        facilities: [4], // 4 = "Pets allowed" facility
+        strictFacilityFiltering: true,
       };
 
       if (vibeQuery) {
@@ -78,7 +81,7 @@ function SearchResults() {
       const ratesData = await ratesRes.json();
 
       if (!ratesData.data || ratesData.data.length === 0) {
-        setError("No hotels found for your search. Try adjusting your dates or destination.");
+        setError("No pet-friendly hotels found for your search. Try adjusting your dates or destination.");
         setLoading(false);
         return;
       }
@@ -105,8 +108,8 @@ function SearchResults() {
       // Get unique hotel IDs
       const hotelIds = rateItems.map((h) => h.hotelId);
 
-      // Fetch hotel details to check pet policies
-      setFilteringMsg(`Checking pet policies for ${hotelIds.length} hotels...`);
+      // Fetch hotel details to get pet policy info
+      setFilteringMsg(`Fetching pet policies for ${hotelIds.length} hotels...`);
 
       const detailPromises = hotelIds.map((id) =>
         fetch(`/api/hotel?hotelId=${encodeURIComponent(id)}`)
@@ -117,7 +120,7 @@ function SearchResults() {
 
       const details = await Promise.all(detailPromises);
 
-      // Filter to pet-friendly only
+      // Build hotel cards — verify pet-friendliness with detail data
       const petFriendlyCards: HotelCard[] = [];
 
       for (let i = 0; i < hotelIds.length; i++) {
@@ -126,30 +129,75 @@ function SearchResults() {
         const priceInfo = priceMap.get(hotelId);
         const brief = briefHotels.find((b) => b.id === hotelId);
 
-        // Check pet policy
+        // Extract pet policy from multiple sources in priority order:
+        // 1. policies[].pets_allowed field (richest info)
+        // 2. policies[].name containing "pet" → description
+        // 3. petsAllowed boolean
         let petPolicy: string | undefined;
-        if (detail?.policies) {
-          const petPol = detail.policies.find((p) =>
-            p.name.toLowerCase().includes("pet")
-          );
-          if (petPol) {
-            // Check it doesn't explicitly forbid pets
-            const desc = petPol.description.toLowerCase();
-            if (
-              !desc.includes("no pets allowed") &&
-              !desc.includes("pets are not allowed") &&
-              !desc.includes("pets not permitted")
-            ) {
-              petPolicy = petPol.description;
+        let isPetFriendly = false;
+
+        if (detail) {
+          // Check policies array for pets_allowed field
+          if (detail.policies) {
+            for (const pol of detail.policies) {
+              // Check the dedicated pets_allowed field first
+              if (pol.pets_allowed && pol.pets_allowed.trim()) {
+                const petsText = pol.pets_allowed.toLowerCase();
+                if (
+                  !petsText.includes("no pets allowed") &&
+                  !petsText.includes("pets are not allowed") &&
+                  !petsText.includes("pets not permitted") &&
+                  !petsText.includes("no pets are allowed")
+                ) {
+                  petPolicy = pol.pets_allowed;
+                  isPetFriendly = true;
+                  break;
+                }
+              }
+              // Fallback: check policy name/description for pet info
+              if (pol.name.toLowerCase().includes("pet")) {
+                const desc = pol.description.toLowerCase();
+                if (
+                  !desc.includes("no pets allowed") &&
+                  !desc.includes("pets are not allowed") &&
+                  !desc.includes("pets not permitted") &&
+                  !desc.includes("no pets are allowed")
+                ) {
+                  petPolicy = pol.description;
+                  isPetFriendly = true;
+                }
+              }
             }
           }
+
+          // Check top-level petsAllowed boolean
+          if (!isPetFriendly && detail.petsAllowed === true) {
+            isPetFriendly = true;
+            petPolicy = "Pets are welcome at this hotel.";
+          }
+
+          // Check if facilities list mentions pets
+          if (!isPetFriendly && detail.hotelFacilities) {
+            const hasPetFacility = detail.hotelFacilities.some((f) =>
+              f.toLowerCase().includes("pet")
+            );
+            if (hasPetFacility) {
+              isPetFriendly = true;
+              petPolicy = petPolicy || "This hotel offers pet-friendly facilities.";
+            }
+          }
+
+          // If petsAllowed is explicitly false, exclude even if facility filter passed
+          if (detail.petsAllowed === false) {
+            isPetFriendly = false;
+            petPolicy = undefined;
+          }
+        } else {
+          // No detail data available — trust the facility filter from the API
+          isPetFriendly = true;
         }
 
-        // Only include if pet-friendly (has a pet policy that allows pets)
-        // In sandbox mode, some hotels may not have detailed policies,
-        // so we also include hotels that don't explicitly forbid pets
-        // when the search was specifically for pet-friendly places
-        if (petPolicy || vibeQuery) {
+        if (isPetFriendly) {
           petFriendlyCards.push({
             hotelId,
             name: detail?.name || brief?.name || `Hotel ${hotelId}`,
