@@ -25,7 +25,7 @@ export default function Header() {
         : "bg-transparent border-none shadow-none"
         }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-center sm:justify-between">
         <Link href="/" className="flex items-center gap-0 group">
           <Image
             src="/media/logovector.svg"
