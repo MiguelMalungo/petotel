@@ -80,6 +80,18 @@ function SearchResults() {
       });
       const ratesData = await ratesRes.json();
 
+      // Handle API-level errors (e.g. no availability, bad request)
+      if (ratesData.error) {
+        const apiMsg = ratesData.error.message || "";
+        if (apiMsg.toLowerCase().includes("no availability")) {
+          setError("No hotels available for those dates. Please try different dates.");
+        } else {
+          setError("No pet-friendly hotels found for your search. Try adjusting your dates or destination.");
+        }
+        setLoading(false);
+        return;
+      }
+
       if (!ratesData.data || ratesData.data.length === 0) {
         setError("No pet-friendly hotels found for your search. Try adjusting your dates or destination.");
         setLoading(false);

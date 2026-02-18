@@ -7,7 +7,7 @@ export async function POST(request: Request) {
         const data = await searchRates(body);
         return NextResponse.json(data);
     } catch (error) {
-        console.error("Error fetching rates:", error);
+        console.error("[rates] Error fetching rates:", error);
         return NextResponse.json(
             { error: "Failed to fetch rates" },
             { status: 500 }
