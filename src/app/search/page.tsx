@@ -50,6 +50,7 @@ function SearchResults() {
     setLoading(true);
     setError("");
     setFilteringMsg("");
+    setHotels([]);
 
     try {
       // Build the rates request body
@@ -64,7 +65,6 @@ function SearchResults() {
         maxRatesPerHotel: 1,
         includeHotelData: true,
         facilities: [4], // 4 = "Pets allowed" facility
-        strictFacilityFiltering: true,
       };
 
       if (vibeQuery) {
