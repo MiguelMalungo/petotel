@@ -4,15 +4,13 @@ import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import HotelCardSkeleton from "@/components/HotelCardSkeleton";
-import { HotelRateData, HotelBrief, HotelDetail } from "@/lib/types";
+import { HotelRateData, HotelBrief } from "@/lib/types";
 import {
   PawPrint,
   ArrowLeft,
   Building2,
   ArrowRight,
 } from "lucide-react";
-
-// SEO: Dynamic page title is handled via useEffect in the client component
 
 interface HotelCard {
   hotelId: string;
@@ -53,8 +51,9 @@ function SearchResults() {
     setHotels([]);
 
     try {
-      // Build the rates request body
-      // Use facility ID 4 ("Pets allowed") to pre-filter at the API level
+      // Pre-filter at LiteAPI with facility 4 (Pets allowed). Do not re-filter
+      // on hotel details: petsAllowed is often false even when hotelFacilities
+      // includes "Pets allowed", which previously emptied every search.
       const body: Record<string, unknown> = {
         occupancies: [{ adults }],
         currency: "USD",
@@ -64,13 +63,17 @@ function SearchResults() {
         roomMapping: true,
         maxRatesPerHotel: 1,
         includeHotelData: true,
-        facilities: [4], // 4 = "Pets allowed" facility
+        facilities: [4],
+        timeout: 8,
       };
 
       if (vibeQuery) {
         body.aiSearch = `${vibeQuery} pet friendly`;
+        if (placeId) body.placeId = placeId;
       } else if (placeId) {
         body.placeId = placeId;
+      } else if (placeName) {
+        body.cityName = placeName.split(",")[0].trim();
       }
 
       const ratesRes = await fetch("/api/rates", {
@@ -80,20 +83,16 @@ function SearchResults() {
       });
       const ratesData = await ratesRes.json();
 
-      // Handle API-level errors (e.g. no availability, bad request)
-      if (ratesData.error) {
-        const apiMsg = ratesData.error.message || "";
-        if (apiMsg.toLowerCase().includes("no availability")) {
-          setError("No hotels available for those dates. Please try different dates.");
-        } else {
-          setError("No pet-friendly hotels found for your search. Try adjusting your dates or destination.");
-        }
+      if (!ratesRes.ok || ratesData.error) {
+        setError("Search failed. Please try again in a moment.");
         setLoading(false);
         return;
       }
 
       if (!ratesData.data || ratesData.data.length === 0) {
-        setError("No pet-friendly hotels found for your search. Try adjusting your dates or destination.");
+        setError(
+          "No pet-friendly hotels found for your search. Try adjusting your dates or destination."
+        );
         setLoading(false);
         return;
       }
@@ -101,7 +100,6 @@ function SearchResults() {
       const rateItems: HotelRateData[] = ratesData.data;
       const briefHotels: HotelBrief[] = ratesData.hotels || [];
 
-      // Build a price map from rates data
       const priceMap = new Map<
         string,
         { price: number; currency: string; refundable: boolean }
@@ -117,136 +115,32 @@ function SearchResults() {
         }
       }
 
-      // Get unique hotel IDs
-      const hotelIds = rateItems.map((h) => h.hotelId);
+      const cards: HotelCard[] = rateItems.map((item) => {
+        const priceInfo = priceMap.get(item.hotelId);
+        const brief = briefHotels.find((b) => b.id === item.hotelId);
+        return {
+          hotelId: item.hotelId,
+          name: brief?.name || `Hotel ${item.hotelId}`,
+          photo: brief?.main_photo || "",
+          address: brief?.address || "",
+          rating: brief?.rating || 0,
+          price: priceInfo?.price || 0,
+          currency: priceInfo?.currency || "USD",
+          tags: brief?.tags,
+          story: brief?.story,
+          petPolicy: "Pets are welcome. Check the hotel page for fees and rules.",
+          refundable: priceInfo?.refundable ?? false,
+        };
+      });
 
-      // Fetch hotel details to get pet policy info
-      setFilteringMsg(`Fetching pet policies for ${hotelIds.length} hotels...`);
-
-      const detailPromises = hotelIds.map((id) =>
-        fetch(`/api/hotel?hotelId=${encodeURIComponent(id)}`)
-          .then((r) => r.json())
-          .then((d) => d.data as HotelDetail | undefined)
-          .catch(() => undefined)
-      );
-
-      const details = await Promise.all(detailPromises);
-
-      // Build hotel cards — verify pet-friendliness with detail data
-      const petFriendlyCards: HotelCard[] = [];
-
-      for (let i = 0; i < hotelIds.length; i++) {
-        const hotelId = hotelIds[i];
-        const detail = details[i];
-        const priceInfo = priceMap.get(hotelId);
-        const brief = briefHotels.find((b) => b.id === hotelId);
-
-        // Extract pet policy from multiple sources in priority order:
-        // 1. policies[].pets_allowed field (richest info)
-        // 2. policies[].name containing "pet" → description
-        // 3. petsAllowed boolean
-        let petPolicy: string | undefined;
-        let isPetFriendly = false;
-
-        if (detail) {
-          // Check policies array for pets_allowed field
-          if (detail.policies) {
-            for (const pol of detail.policies) {
-              // Check the dedicated pets_allowed field first
-              if (pol.pets_allowed && pol.pets_allowed.trim()) {
-                const petsText = pol.pets_allowed.toLowerCase();
-                if (
-                  !petsText.includes("no pets allowed") &&
-                  !petsText.includes("pets are not allowed") &&
-                  !petsText.includes("pets not permitted") &&
-                  !petsText.includes("no pets are allowed")
-                ) {
-                  petPolicy = pol.pets_allowed;
-                  isPetFriendly = true;
-                  break;
-                }
-              }
-              // Fallback: check policy name/description for pet info
-              if (pol.name.toLowerCase().includes("pet")) {
-                const desc = pol.description.toLowerCase();
-                if (
-                  !desc.includes("no pets allowed") &&
-                  !desc.includes("pets are not allowed") &&
-                  !desc.includes("pets not permitted") &&
-                  !desc.includes("no pets are allowed")
-                ) {
-                  petPolicy = pol.description;
-                  isPetFriendly = true;
-                }
-              }
-            }
-          }
-
-          // Check top-level petsAllowed boolean
-          if (!isPetFriendly && detail.petsAllowed === true) {
-            isPetFriendly = true;
-            petPolicy = "Pets are welcome at this hotel.";
-          }
-
-          // Check if facilities list mentions pets
-          if (!isPetFriendly && detail.hotelFacilities) {
-            const hasPetFacility = detail.hotelFacilities.some((f) =>
-              f.toLowerCase().includes("pet")
-            );
-            if (hasPetFacility) {
-              isPetFriendly = true;
-              petPolicy = petPolicy || "This hotel offers pet-friendly facilities.";
-            }
-          }
-
-          // If petsAllowed is explicitly false, exclude even if facility filter passed
-          if (detail.petsAllowed === false) {
-            isPetFriendly = false;
-            petPolicy = undefined;
-          }
-        } else {
-          // No detail data available — trust the facility filter from the API
-          isPetFriendly = true;
-        }
-
-        if (isPetFriendly) {
-          petFriendlyCards.push({
-            hotelId,
-            name: detail?.name || brief?.name || `Hotel ${hotelId}`,
-            photo:
-              detail?.main_photo ||
-              detail?.hotelImages?.[0]?.url ||
-              brief?.main_photo ||
-              "",
-            address:
-              detail
-                ? `${detail.address}, ${detail.city}`
-                : brief?.address || "",
-            rating: brief?.rating || detail?.starRating || 0,
-            price: priceInfo?.price || 0,
-            currency: priceInfo?.currency || "USD",
-            tags: brief?.tags,
-            story: brief?.story,
-            petPolicy: petPolicy || "Contact hotel for pet policy details",
-            refundable: priceInfo?.refundable ?? false,
-          });
-        }
-      }
-
-      if (petFriendlyCards.length === 0) {
-        setError(
-          "No pet-friendly hotels found for your search. Try a different destination or use the vibe search with pet-related terms."
-        );
-      }
-
-      setHotels(petFriendlyCards);
+      setHotels(cards);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
       setFilteringMsg("");
     }
-  }, [checkin, checkout, adults, placeId, vibeQuery]);
+  }, [checkin, checkout, adults, placeId, placeName, vibeQuery]);
 
   useEffect(() => {
     if (checkin && checkout) {
@@ -270,7 +164,6 @@ function SearchResults() {
     ? `"${vibeQuery}"`
     : placeName || "your destination";
 
-  // Dynamic SEO title for browser tab
   useEffect(() => {
     const destination = placeName || vibeQuery || "Your Destination";
     document.title = `Pet-Friendly Hotels in ${destination} | PetOtel`;
@@ -278,7 +171,6 @@ function SearchResults() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-14">
-      {/* Search Summary */}
       <div className="mb-8">
         <button
           onClick={() => router.push("/")}
@@ -297,7 +189,6 @@ function SearchResults() {
         </p>
       </div>
 
-      {/* Loading State */}
       {loading && (
         <div>
           {filteringMsg && (
@@ -314,12 +205,11 @@ function SearchResults() {
         </div>
       )}
 
-      {/* Error State */}
       {!loading && error && (
         <div className="text-center py-20">
           <PawPrint className="w-12 h-12 text-warm-gray mx-auto mb-4" />
           <p className="text-lg font-medium text-foreground mb-2">
-            No pet-friendly hotels found
+            {error.startsWith("Search failed") ? "Search failed" : "No pet-friendly hotels found"}
           </p>
           <p className="text-sm text-text-secondary max-w-md mx-auto mb-6">
             {error}
@@ -333,7 +223,6 @@ function SearchResults() {
         </div>
       )}
 
-      {/* Results Grid */}
       {!loading && !error && (
         <>
           <p className="text-sm text-text-secondary mb-6">
@@ -347,7 +236,6 @@ function SearchResults() {
                 onClick={() => navigateToHotel(hotel.hotelId)}
                 className="bg-surface rounded-2xl border border-border-custom overflow-hidden text-left hover:shadow-lg hover:border-accent/30 transition-all group"
               >
-                {/* Image */}
                 <div className="relative h-48 bg-surface-alt overflow-hidden">
                   {hotel.photo ? (
                     <Image
@@ -362,12 +250,10 @@ function SearchResults() {
                       <Building2 className="w-10 h-10" />
                     </div>
                   )}
-                  {/* Pet Badge */}
                   <div className="absolute top-3 left-3 bg-sage text-white text-xs font-medium px-2.5 py-1 rounded-full inline-flex items-center gap-1">
                     <PawPrint className="w-3 h-3" />
                     Pet Friendly
                   </div>
-                  {/* Refundable Badge */}
                   {hotel.refundable && (
                     <div className="absolute top-3 right-3 bg-surface/90 backdrop-blur-sm text-sage text-xs font-medium px-2 py-1 rounded-full">
                       Free cancellation
@@ -375,7 +261,6 @@ function SearchResults() {
                   )}
                 </div>
 
-                {/* Info */}
                 <div className="p-5">
                   <h3 className="font-semibold text-foreground text-lg leading-tight mb-1 group-hover:text-accent transition-colors">
                     {hotel.name}
@@ -384,7 +269,6 @@ function SearchResults() {
                     {hotel.address}
                   </p>
 
-                  {/* Rating */}
                   {hotel.rating > 0 && (
                     <div className="flex items-center gap-2 mb-3">
                       <span className="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded-md">
@@ -402,7 +286,6 @@ function SearchResults() {
                     </div>
                   )}
 
-                  {/* Tags */}
                   {hotel.tags && hotel.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {hotel.tags.slice(0, 3).map((tag) => (
@@ -416,7 +299,6 @@ function SearchResults() {
                     </div>
                   )}
 
-                  {/* Pet Policy Preview */}
                   {hotel.petPolicy && (
                     <p className="text-xs text-sage bg-sage-light px-3 py-2 rounded-lg mb-3 line-clamp-2 flex items-start gap-1.5">
                       <PawPrint className="w-3 h-3 mt-0.5 flex-shrink-0" />
@@ -424,7 +306,6 @@ function SearchResults() {
                     </p>
                   )}
 
-                  {/* Price */}
                   <div className="flex items-end justify-between">
                     <div>
                       <span className="text-xs text-text-secondary">from</span>
