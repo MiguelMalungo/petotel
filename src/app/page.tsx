@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { format, addDays } from "date-fns";
+import { format, addDays, startOfDay } from "date-fns";
 import { DateRange } from "react-day-picker";
 import PlacesAutocomplete from "@/components/PlacesAutocomplete";
 import DateRangePicker from "@/components/DateRangePicker";
@@ -28,18 +28,31 @@ const VIBE_SUGGESTIONS = [
   "Family resort pets welcome",
 ];
 
+/** Check-in 7 days out, 3-night stay. Always computed from now so SSG cannot freeze past dates. */
+function getDefaultDateRange(): DateRange {
+  const today = startOfDay(new Date());
+  return {
+    from: addDays(today, 7),
+    to: addDays(today, 10),
+  };
+}
+
 export default function Home() {
   const router = useRouter();
   const [mode, setMode] = useState<SearchMode>("destination");
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [vibeQuery, setVibeQuery] = useState("");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: addDays(new Date(), 7),
-    to: addDays(new Date(), 10),
-  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(getDefaultDateRange);
   const [adults, setAdults] = useState(2);
   const [petType, setPetType] = useState("dog");
   const [petCount, setPetCount] = useState(1);
+
+  // Next.js statically prerenders this client page at build time, which would
+  // otherwise bake build-time dates into the HTML (e.g. 25–28 Feb 2026).
+  // Recompute after mount so check-in/out are always in the future.
+  useEffect(() => {
+    setDateRange(getDefaultDateRange());
+  }, []);
 
   function handleSearch() {
     if (!dateRange?.from || !dateRange?.to) return;
@@ -106,20 +119,22 @@ export default function Home() {
             <div className="inline-flex gap-1 bg-black/40 backdrop-blur-md rounded-full p-1">
               <button
                 onClick={() => setMode("destination")}
-                className={`py-2 px-5 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${mode === "destination"
-                  ? "bg-white text-foreground shadow-sm"
-                  : "text-white/80 hover:text-white"
-                  }`}
+                className={`py-2 px-5 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                  mode === "destination"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-white/80 hover:text-white"
+                }`}
               >
                 <MapPin className="w-3.5 h-3.5" />
                 Destination
               </button>
               <button
                 onClick={() => setMode("vibe")}
-                className={`py-2 px-5 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${mode === "vibe"
-                  ? "bg-white text-foreground shadow-sm"
-                  : "text-white/80 hover:text-white"
-                  }`}
+                className={`py-2 px-5 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                  mode === "vibe"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-white/80 hover:text-white"
+                }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 Vibe Search
@@ -251,20 +266,22 @@ export default function Home() {
           <div className="flex gap-1 bg-surface-alt rounded-xl p-1 mb-4">
             <button
               onClick={() => setMode("destination")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${mode === "destination"
-                ? "bg-white text-foreground shadow-sm"
-                : "text-text-secondary"
-                }`}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+                mode === "destination"
+                  ? "bg-white text-foreground shadow-sm"
+                  : "text-text-secondary"
+              }`}
             >
               <MapPin className="w-3.5 h-3.5" />
               Destination
             </button>
             <button
               onClick={() => setMode("vibe")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${mode === "vibe"
-                ? "bg-white text-foreground shadow-sm"
-                : "text-text-secondary"
-                }`}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+                mode === "vibe"
+                  ? "bg-white text-foreground shadow-sm"
+                  : "text-text-secondary"
+              }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
               Vibe Search
@@ -410,7 +427,7 @@ export default function Home() {
           ].map((f) => (
             <div
               key={f.title}
-              className="group relative overflow-hidden rounded-2xl border border-border-custom h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 hover:shadow-xl transition-all duration-300"
+              className={`group relative overflow-hidden rounded-2xl border border-border-custom h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 hover:shadow-xl transition-all duration-300`}
             >
               {/* Background Image */}
               <div
