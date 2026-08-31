@@ -55,7 +55,6 @@ function HotelDetailPage() {
     setError("");
 
     try {
-      // Fetch hotel details and rates in parallel
       const [detailRes, ratesRes] = await Promise.all([
         fetch(`/api/hotel?hotelId=${encodeURIComponent(hotelId)}`),
         fetch("/api/rates", {
@@ -84,12 +83,10 @@ function HotelDetailPage() {
       }
       setLoading(false);
 
-      // Process rates
       if (ratesData.data && ratesData.data.length > 0) {
         const hotelRates: HotelRateData = ratesData.data[0];
         const hotelRooms = detailData.data?.rooms || [];
 
-        // Group by mappedRoomId
         const groupMap = new Map<number, GroupedRoom>();
 
         for (const roomType of hotelRates.roomTypes) {
@@ -138,7 +135,6 @@ function HotelDetailPage() {
     fetchHotelData();
   }, [fetchHotelData]);
 
-  // Dynamic SEO title for browser tab
   useEffect(() => {
     if (hotel) {
       document.title = `${hotel.name} — Pet-Friendly Hotel in ${hotel.city} | PetOtel`;
@@ -184,19 +180,16 @@ function HotelDetailPage() {
     );
   }
 
-  // Extract pet policy from multiple sources
   let petPolicyText: string | undefined;
   let petPolicySource: "policy" | "boolean" | "facility" | undefined;
 
   if (hotel.policies) {
     for (const pol of hotel.policies) {
-      // Check dedicated pets_allowed field first (richest info)
       if (pol.pets_allowed && pol.pets_allowed.trim()) {
         petPolicyText = pol.pets_allowed;
         petPolicySource = "policy";
         break;
       }
-      // Fallback: check policy name for "pet"
       if (pol.name.toLowerCase().includes("pet") && pol.description.trim()) {
         petPolicyText = pol.description;
         petPolicySource = "policy";
@@ -204,13 +197,11 @@ function HotelDetailPage() {
     }
   }
 
-  // Fallback to petsAllowed boolean
   if (!petPolicyText && hotel.petsAllowed === true) {
     petPolicyText = "Pets are welcome at this hotel. Contact the property for specific requirements and fees.";
     petPolicySource = "boolean";
   }
 
-  // Check facilities for pet-related entries
   if (!petPolicyText && hotel.hotelFacilities) {
     const petFacilities = hotel.hotelFacilities.filter((f) =>
       f.toLowerCase().includes("pet")
@@ -221,9 +212,9 @@ function HotelDetailPage() {
     }
   }
 
-  const isPetFriendly = hotel.petsAllowed !== false && (!!petPolicyText || hotel.petsAllowed === true);
+  // Trust policy text / facilities even when petsAllowed is the stale false flag.
+  const isPetFriendly = !!petPolicyText || hotel.petsAllowed === true;
 
-  // Legacy reference for the JSX below
   const petPolicy = petPolicyText
     ? { name: "Pet Policy", description: petPolicyText }
     : undefined;
@@ -236,7 +227,6 @@ function HotelDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-14">
-      {/* Back Button */}
       <button
         onClick={() => router.back()}
         className="text-sm text-text-secondary hover:text-accent transition-colors mb-6 inline-flex items-center gap-1.5"
@@ -245,9 +235,7 @@ function HotelDetailPage() {
         Back to results
       </button>
 
-      {/* Hotel Header */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-10">
-        {/* Images */}
         <div className="lg:col-span-3">
           <div className="relative h-[400px] rounded-2xl overflow-hidden bg-surface-alt">
             {images.length > 0 ? (
@@ -271,10 +259,11 @@ function HotelDetailPage() {
                 <button
                   key={i}
                   onClick={() => setSelectedImage(i)}
-                  className={`relative w-20 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${selectedImage === i
-                    ? "border-accent"
-                    : "border-transparent hover:border-accent/30"
-                    }`}
+                  className={`relative w-20 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${
+                    selectedImage === i
+                      ? "border-accent"
+                      : "border-transparent hover:border-accent/30"
+                  }`}
                 >
                   <Image
                     src={img.url}
@@ -289,7 +278,6 @@ function HotelDetailPage() {
           )}
         </div>
 
-        {/* Hotel Info */}
         <div className="lg:col-span-2">
           <div className="bg-surface rounded-2xl border border-border-custom p-6">
             <div className="flex items-center gap-1 mb-1">
@@ -311,7 +299,6 @@ function HotelDetailPage() {
               {Number(petCount) > 1 ? "s" : ""}
             </div>
 
-            {/* Pet Policy */}
             {isPetFriendly && petPolicy ? (
               <div className="bg-sage-light border border-sage/20 rounded-xl p-4 mb-4">
                 <h3 className="font-semibold text-sage-dark text-sm mb-2 flex items-center gap-2">
@@ -327,7 +314,7 @@ function HotelDetailPage() {
                   </p>
                 ) : null}
               </div>
-            ) : hotel.petsAllowed === false ? (
+            ) : hotel.petsAllowed === false && !petPolicyText ? (
               <div className="bg-error-light border border-error/20 rounded-xl p-4 mb-4">
                 <p className="text-sm text-error flex items-center gap-2">
                   <PawPrint className="w-4 h-4" />
@@ -343,7 +330,6 @@ function HotelDetailPage() {
               </div>
             )}
 
-            {/* Facilities */}
             {hotel.hotelFacilities && hotel.hotelFacilities.length > 0 && (
               <div className="mb-4">
                 <h3 className="text-sm font-medium text-foreground mb-2">
@@ -367,7 +353,6 @@ function HotelDetailPage() {
               </div>
             )}
 
-            {/* Sentiment */}
             {hotel.sentiment_analysis && (
               <div className="space-y-2">
                 {hotel.sentiment_analysis.pros?.length > 0 && (
@@ -393,7 +378,6 @@ function HotelDetailPage() {
         </div>
       </div>
 
-      {/* Description */}
       {hotel.hotelDescription && (
         <div className="bg-surface rounded-2xl border border-border-custom p-6 mb-8">
           <h2 className="text-lg font-semibold text-foreground mb-3">
@@ -406,7 +390,6 @@ function HotelDetailPage() {
         </div>
       )}
 
-      {/* Room Rates */}
       <div className="mb-8">
         <h2 className="text-xl font-bold text-foreground mb-6">
           Available Rooms
@@ -427,7 +410,6 @@ function HotelDetailPage() {
                 className="bg-surface rounded-2xl border border-border-custom overflow-hidden"
               >
                 <div className="flex flex-col sm:flex-row">
-                  {/* Room Image */}
                   <div className="relative w-full sm:w-56 h-40 sm:h-auto flex-shrink-0 bg-surface-alt">
                     {room.roomPhoto ? (
                       <Image
@@ -444,13 +426,11 @@ function HotelDetailPage() {
                     )}
                   </div>
 
-                  {/* Room Details */}
                   <div className="flex-1 p-5">
                     <h3 className="text-lg font-semibold text-foreground mb-3">
                       {room.roomName}
                     </h3>
 
-                    {/* Offers */}
                     <div className="space-y-3">
                       {room.offers.map((offer) => (
                         <div
@@ -466,10 +446,11 @@ function HotelDetailPage() {
                                 {offer.boardName}
                               </span>
                               <span
-                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${offer.refundableTag === "RFN"
-                                  ? "bg-sage-light text-sage"
-                                  : "bg-terracotta-light text-terracotta"
-                                  }`}
+                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  offer.refundableTag === "RFN"
+                                    ? "bg-sage-light text-sage"
+                                    : "bg-terracotta-light text-terracotta"
+                                }`}
                               >
                                 {offer.refundableTag === "RFN"
                                   ? "Free cancellation"
@@ -523,7 +504,6 @@ function HotelDetailPage() {
         )}
       </div>
 
-      {/* Important Info */}
       {hotel.hotelImportantInformation && (
         <div className="bg-accent-bg border border-accent-light rounded-2xl p-6 mb-8">
           <h3 className="font-semibold text-accent mb-2 flex items-center gap-2">
